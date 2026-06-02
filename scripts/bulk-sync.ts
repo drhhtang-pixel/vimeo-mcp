@@ -82,7 +82,12 @@ async function main() {
       const match = findBestMatch(video, pages);
 
       if (!match) {
-        console.log("❌ 找不到對應頁面");
+        if (pages.length === 0) {
+          console.log("❌ 找不到對應頁面（該日期無任何 Notion 頁面）");
+        } else {
+          const closest = pages.map(p => Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000));
+          console.log(`❌ 找不到對應頁面（該日期有 ${pages.length} 頁，最近差 ${Math.round(Math.min(...closest))} min）`);
+        }
         results.noMatch++;
       } else if (match.ambiguous) {
         console.log(`⚠️  配對不確定 → "${match.page.name}" (${Math.round(match.diffMin)} min diff)`);
