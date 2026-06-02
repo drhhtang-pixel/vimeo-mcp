@@ -89,3 +89,31 @@ Vimeo Developer Portal → 你的 App → Webhooks
 ```bash
 vercel --prod
 ```
+
+## 維運教訓
+
+### 憑證輪換順序
+
+**錯誤做法**：先撤銷舊憑證 → 再設新憑證（中間有空窗期，系統完全失效）
+
+**正確順序**：
+1. 產生新憑證
+2. 立刻在本機測試新憑證是否有效（`curl` 直接打 API）
+3. 將新憑證設進 Vercel，確認部署正常、webhook 回 200
+4. 確認無誤後，才撤銷舊憑證
+
+### 設定 Vercel 環境變數
+
+**不要**用 Claude Code 的 `!` prefix 設定含長字串的 env var——指令換行會導致 `--value` 被截斷，造成 `rm` 成功但 `add` 失敗，留下空白變數。
+
+**使用 Terminal.app**，搭配 `printf` pipe：
+```bash
+printf '你的token或secret' | vercel env add VARIABLE_NAME production --yes
+```
+
+### Vimeo Personal Access Token
+
+產生後只顯示一次，無法事後查詢。產生後立刻：
+1. 複製完整字串
+2. 在本機驗證有效：`curl -s https://api.vimeo.com/me -H "Authorization: Bearer <token>"`
+3. 確認回傳帳號資訊後再存入 Vercel
