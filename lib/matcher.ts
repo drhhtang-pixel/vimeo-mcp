@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN!;
-const NOTION_DB_ID = process.env.NOTION_DB_ID || "509fb00d-fe73-8384-88ba-81eba4ad2d6f";
+const NOTION_DB_ID = process.env.NOTION_DB_ID!;
 const VIMEO_TOKEN = process.env.VIMEO_ACCESS_TOKEN!;
 
 const notion = axios.create({

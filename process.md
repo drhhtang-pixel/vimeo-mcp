@@ -43,13 +43,13 @@ Claude Code
 | `VIMEO_ACCESS_TOKEN` | Vimeo Personal Access Token（public + private scope 只讀） |
 | `VIMEO_WEBHOOK_SECRET` | Vimeo Webhook 簽名密鑰 |
 | `NOTION_TOKEN` | Notion Integration Token |
-| `NOTION_DB_ID` | Meeting Notes 資料庫 ID：`509fb00d-fe73-8384-88ba-81eba4ad2d6f` |
+| `NOTION_DB_ID` | Meeting Notes 資料庫 ID（從 Notion 資料庫 URL 取得） |
 | `SLACK_WEBHOOK_URL` | Slack Incoming Webhook（發送 DM 通知） |
 
 ### Webhook 端點
 
 ```
-POST https://vimeo-mcp.vercel.app/api/webhook
+POST https://<your-vercel-domain>/api/webhook
 Header: X-Vimeo-Signature: <HMAC-SHA256>
 ```
 
