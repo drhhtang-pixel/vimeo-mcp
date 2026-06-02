@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "bulk-sync": "tsx scripts/bulk-sync.ts",
     "fix-recording-date": "tsx scripts/fix-recording-date.ts",
-    "generate-checklist": "tsx scripts/generate-checklist.ts"
+    "generate-checklist": "tsx scripts/generate-checklist.ts",
+    "date-align-sync": "tsx scripts/date-align-sync.ts"
   },
   "keywords": [],
   "author": "",
