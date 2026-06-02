@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "public",
+  "functions": {
+    "api/webhook.ts": {
+      "maxDuration": 30
+    }
+  }
+}
