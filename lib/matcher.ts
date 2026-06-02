@@ -79,10 +79,10 @@ interface NotionProperty {
 }
 
 export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]> {
-  // date = "YYYY-MM-DD" (Taipei). Filter by the Date property (date type), not created_time.
+  // Filter by「錄影日期」(YYYY-MM-DD in Taipei time).
   const resp = await notion.post(`/databases/${NOTION_DB_ID}/query`, {
     filter: {
-      property: "Date",
+      property: "錄影日期",
       date: { equals: date },
     },
     sorts: [{ timestamp: "created_time", direction: "ascending" }],
@@ -92,12 +92,26 @@ export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]>
   return resp.data.results.map((p: Record<string, unknown>) => {
     const props = p.properties as Record<string, NotionProperty>;
     const name = (props.Name?.title ?? []).map((t) => t.plain_text).join("").trim();
-    const meetingDate = props.Date?.date?.start ?? date;
+    const meetingDate = props["錄影日期"]?.date?.start ?? date;
+
+    // Prefer Meeting Start for time comparison (most accurate);
+    // fall back to 錄影日期 datetime if it has a time component, then system created_time.
+    const meetingStartRaw = props["Meeting Start"]?.date?.start;
+    const recordingDateRaw = props["錄影日期"]?.date?.start;
+    let meetingTime: Date;
+    if (meetingStartRaw) {
+      meetingTime = new Date(meetingStartRaw);
+    } else if (recordingDateRaw && recordingDateRaw.includes("T")) {
+      meetingTime = new Date(recordingDateRaw);
+    } else {
+      meetingTime = new Date(p.created_time as string);
+    }
+
     return {
       id: p.id as string,
       name,
       meetingDate,
-      createdUtc: new Date(p.created_time as string),
+      createdUtc: meetingTime,
       vimeoUrl: props["Vimeo 錄影連結"]?.url ?? null,
     };
   });
