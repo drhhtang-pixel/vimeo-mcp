@@ -32,7 +32,7 @@
 
 ---
 
-## B｜有 Notion Meeting Note，但無 Vimeo 連結（41 筆）
+## B｜有 Notion Meeting Note，但無 Vimeo 連結（36 筆）
 
 這些頁面沒有錄影連結，可能是沒有錄影、手動補連結，或等待下一次 bulk-sync。
 
@@ -45,23 +45,18 @@
 | 2026-04-22 | 2026 Gen AI 論壇 2026-04-22T09:55:00.000+08:00 | [開啟](https://www.notion.so/2026-Gen-AI-34afb00dfe73804e9ab7f4298792ae22) |
 | 2026-04-23 | UOID 討論（線上）品姸 2026-04-23T10:45:00.000+08:00 | [開啟](https://www.notion.so/UOID-34bfb00dfe738015946ee5bf64c7f49d) |
 | 2026-04-23 | 博班團咪(線下) 2026-04-23T09:30:00.000+08:00 | [開啟](https://www.notion.so/34bfb00dfe73803292d8c3dfde1e7bf5) |
-| 2026-04-24 | DITL Meeting (日碩) 2026-04-24T09:10:00.000+08:00 | [開啟](https://www.notion.so/DITL-Meeting-34cfb00dfe738069a3e0f35931c04724) |
-| 2026-04-25 | 使用者需求探索實務 期中發表 2026-04-25T09:00:00.000+08:00 | [開啟](https://www.notion.so/34dfb00dfe7380c9976ee936541e27b6) |
 | 2026-04-29 | Mike discussion 唐碩 Skills / online 2026-04-29T15:3 | [開啟](https://www.notion.so/Mike-discussion-Skills-online-351fb00dfe738030a9c3e6cc38aa7f24) |
 | 2026-04-29 | 使用者導向創新設計 方老師2026-04-29T09:00:00.000+08:00 | [開啟](https://www.notion.so/351fb00dfe7380969fd9de58ec0167bc) |
-| 2026-04-29 | Mike Talk about AI 2026-04-29T15:30:00.000+08:00 | [開啟](https://www.notion.so/Mike-Talk-about-AI-351fb00dfe738021b821e18f8d7f589d) |
 | 2026-04-30 | DITL Meeting (全員) ｜高見龍演講 SDD 2026-04-30T19:00:00.0 | [開啟](https://www.notion.so/DITL-Meeting-SDD-352fb00dfe7380bf9639d2d9b0ff0175) |
 | 2026-04-30 | 青少年專櫃化妝品市場 2026-04-30T16:00:00.000+08:00 | [開啟](https://www.notion.so/352fb00dfe738017a65af891efbba89a) |
 | 2026-05-01 | 線上_照護專案 2026-05-01T14:00:00.000+08:00 | [開啟](https://www.notion.so/_-353fb00dfe73807b8a32c8ca3c36e1bb) |
 | 2026-05-04 | 使用者需求探索實務  HOLA Case Study | [開啟](https://www.notion.so/HOLA-Case-Study-e1d7c57cf84c44808f67828dddb498d3) |
 | 2026-05-04 | 使用者需求探索實務 YY | [開啟](https://www.notion.so/YY-f9bc185d3df546ccb4618fb4da5a0843) |
-| 2026-05-04 | 使用者需求探索實務 2026-05-04T09:00:00.000+08:00 | [開啟](https://www.notion.so/356fb00dfe738016a241e64c55d93bb1) |
 | 2026-05-05 | 心瑩討論（線上） 2026-05-05T13:30:00.000+08:00 | [開啟](https://www.notion.so/357fb00dfe73806f923ccb03da4e98b0) |
 | 2026-05-05 | [經濟部台法計畫] StyTrix AI 平台驗證 W/台科大唐教授 2026-05-05T10:0 | [開啟](https://www.notion.so/StyTrix-AI-W-357fb00dfe7380adbc9ce0e45a9caef6) |
 | 2026-05-06 | 使用者導向創新設計 ｜方老師 價值 2026-05-06T09:00:00.000+08:00 | [開啟](https://www.notion.so/357fb00dfe73802a9964cd09a2dc7b6a) |
 | 2026-05-08 | 玉山銀行上課 2026-05-08T13:30:00.000+08:00 | [開啟](https://www.notion.so/35afb00dfe73801ca179cb94f315de5c) |
 | 2026-05-09 | AIA 人工智慧課程 | 紹唯晏 2026-05-09T13:00:00.000+08:00 | [開啟](https://www.notion.so/AIA-35bfb00dfe7380c99240c6c2755915ee) |
-| 2026-05-11 | 使用者需求探索實務 2026-05-11T09:00:00.000+08:00 | [開啟](https://www.notion.so/35bfb00dfe73802d88c7ed2938999967) |
 | 2026-05-14 | TaiwanPlus 執行長拜訪E2-309 2026-05-14T14:00:00.000+08: | [開啟](https://www.notion.so/TaiwanPlus-E2-309-db0fb00dfe7383e9b66081339224b8ba) |
 | 2026-05-14 | 日碩 - Methodology Checking 2026-05-14T10:00:00.000+ | [開啟](https://www.notion.so/Methodology-Checking-360fb00dfe73807fa2f0f9ef143cd210) |
 | 2026-05-15 | 蕭老師 學生口試 2026-05-15T11:45:00.000+08:00 | [開啟](https://www.notion.so/361fb00dfe7380ed9fedff1a09d384e7) |

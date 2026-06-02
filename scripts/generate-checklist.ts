@@ -92,7 +92,7 @@ async function fetchAllNotionPages() {
     for (const p of resp.data.results) {
       const props = p.properties as Record<string, any>;
       const name = (props.Name?.title ?? []).map((t: any) => t.plain_text).join("").trim();
-      const date: string = props["錄影日期"]?.date?.start?.slice(0, 10) ?? "";
+      const date: string = props["錄影時間"]?.date?.start?.slice(0, 10) ?? "";
       const vimeoUrl: string | null = props["Vimeo 錄影連結"]?.url ?? null;
       pages.push({ id: p.id, name, date, vimeoUrl, notionUrl: p.url });
     }
