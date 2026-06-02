@@ -79,10 +79,10 @@ interface NotionProperty {
 }
 
 export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]> {
-  // Filter by「錄影日期」(YYYY-MM-DD in Taipei time).
+  // Filter by「錄影時間」(YYYY-MM-DD in Taipei time).
   const resp = await notion.post(`/databases/${NOTION_DB_ID}/query`, {
     filter: {
-      property: "錄影日期",
+      property: "錄影時間",
       date: { equals: date },
     },
     sorts: [{ timestamp: "created_time", direction: "ascending" }],
@@ -92,12 +92,12 @@ export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]>
   return resp.data.results.map((p: Record<string, unknown>) => {
     const props = p.properties as Record<string, NotionProperty>;
     const name = (props.Name?.title ?? []).map((t) => t.plain_text).join("").trim();
-    const meetingDate = props["錄影日期"]?.date?.start ?? date;
+    const meetingDate = props["錄影時間"]?.date?.start ?? date;
 
     // Prefer Meeting Start for time comparison (most accurate);
-    // fall back to 錄影日期 datetime if it has a time component, then system created_time.
+    // fall back to 錄影時間 datetime if it has a time component, then system created_time.
     const meetingStartRaw = props["Meeting Start"]?.date?.start;
-    const recordingDateRaw = props["錄影日期"]?.date?.start;
+    const recordingDateRaw = props["錄影時間"]?.date?.start;
     let meetingTime: Date;
     if (meetingStartRaw) {
       meetingTime = new Date(meetingStartRaw);
