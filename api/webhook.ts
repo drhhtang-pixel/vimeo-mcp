@@ -114,15 +114,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const match: MatchResult | null = findBestMatch(video, pages);
 
     if (!match) {
-      // If a nearby page (within 30 min) already has a Vimeo link, the meeting is covered — skip silently
-      const THRESHOLD_MIN = 30;
-      const nearbyAlreadyLinked = pages.some(
-        (p) => p.vimeoUrl && Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000) <= THRESHOLD_MIN
-      );
-      if (nearbyAlreadyLinked) {
-        console.log(`Skip: nearby Notion page on ${video.date_taipei} already has a Vimeo link`);
-        return res.status(200).json({ matched: false, skipped: "nearby_already_linked", date: video.date_taipei });
+      // All pages on this date already have a Vimeo link — meeting is covered, skip silently
+      if (pages.length > 0 && pages.every((p) => p.vimeoUrl)) {
+        console.log(`Skip: all Notion pages on ${video.date_taipei} already have a Vimeo link`);
+        return res.status(200).json({ matched: false, skipped: "all_already_linked", date: video.date_taipei });
       }
+      // No Notion page found, or multiple pages but none within time threshold
       console.log(`No matching Notion page found for ${video.date_taipei}`);
       await notifySlack(
         `⚠️ *Vimeo 錄影找不到對應的 Notion 頁面，請手動處理*\n` +

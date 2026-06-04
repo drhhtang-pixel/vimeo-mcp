@@ -144,15 +144,25 @@ export function findBestMatch(
   pages: NotionPage[],
   thresholdMin = 30
 ): MatchResult | null {
-  const unlinked = score(pages.filter((p) => !p.vimeoUrl), video);
-  const linked   = score(pages.filter((p) => !!p.vimeoUrl), video);
+  const unlinked = pages.filter((p) => !p.vimeoUrl);
 
-  const best = unlinked[0];
-  if (!best || best.diffMin > thresholdMin) return null;
+  // All pages already have a Vimeo link — nothing to do
+  if (unlinked.length === 0) return null;
 
-  const ambiguous = unlinked.length > 1 && unlinked[1].diffMin <= thresholdMin;
+  // Single unlinked page on this date — link directly without time comparison
+  if (unlinked.length === 1) {
+    const diffMin = Math.abs((unlinked[0].createdUtc.getTime() - video.startTime.getTime()) / 60000);
+    return { page: unlinked[0], diffMin, ambiguous: false, possibleConflict: null };
+  }
 
-  // Detect if a page that already has a link would have been a closer match
+  // Multiple unlinked pages — pick closest within threshold
+  const scored = score(unlinked, video);
+  const best = scored[0];
+  if (best.diffMin > thresholdMin) return null;
+
+  const ambiguous = scored.length > 1 && scored[1].diffMin <= thresholdMin;
+
+  const linked = score(pages.filter((p) => !!p.vimeoUrl), video);
   const conflict = linked[0];
   const possibleConflict =
     conflict && conflict.diffMin <= thresholdMin && conflict.diffMin < best.diffMin

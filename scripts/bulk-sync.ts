@@ -81,12 +81,8 @@ async function main() {
       const match = findBestMatch(video, pages);
 
       if (!match) {
-        const THRESHOLD_MIN = 30;
-        const nearbyLinked = pages.some(
-          (p) => p.vimeoUrl && Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000) <= THRESHOLD_MIN
-        );
-        if (nearbyLinked) {
-          console.log("⏭  已涵蓋（附近頁面已有錄影連結）");
+        if (pages.length > 0 && pages.every((p) => p.vimeoUrl)) {
+          console.log("⏭  已涵蓋（當日所有頁面皆已有錄影連結）");
         } else if (pages.length === 0) {
           console.log("❌ 找不到對應頁面（該日期無任何 Notion 頁面）");
           results.noMatch++;
