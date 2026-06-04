@@ -102,12 +102,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ skipped: "too short", duration: video.durationSec });
     }
 
+    const FROM_MONTH = "2026-06";
+    if (video.date_taipei < FROM_MONTH) {
+      console.log(`Skip old video: ${video.title} (${video.date_taipei})`);
+      return res.status(200).json({ skipped: "before_from_month", date: video.date_taipei });
+    }
+
     console.log(`Processing: ${video.title} | date: ${video.date_taipei} | ${video.durationSec}s`);
 
     const pages = await findNotionPagesOnDate(video.date_taipei);
     const match: MatchResult | null = findBestMatch(video, pages);
 
     if (!match) {
+      // If a nearby page (within 30 min) already has a Vimeo link, the meeting is covered — skip silently
+      const THRESHOLD_MIN = 30;
+      const nearbyAlreadyLinked = pages.some(
+        (p) => p.vimeoUrl && Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000) <= THRESHOLD_MIN
+      );
+      if (nearbyAlreadyLinked) {
+        console.log(`Skip: nearby Notion page on ${video.date_taipei} already has a Vimeo link`);
+        return res.status(200).json({ matched: false, skipped: "nearby_already_linked", date: video.date_taipei });
+      }
       console.log(`No matching Notion page found for ${video.date_taipei}`);
       await notifySlack(
         `⚠️ *Vimeo 錄影找不到對應的 Notion 頁面，請手動處理*\n` +

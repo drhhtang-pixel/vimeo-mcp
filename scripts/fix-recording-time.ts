@@ -43,10 +43,14 @@ function extractDatetimeFromName(name: string): string | null {
 }
 
 async function renameProperty() {
-  await notion.patch(`/databases/${NOTION_DB_ID}`, {
-    properties: { "錄影日期": { name: "錄影時間" } },
-  });
-  console.log('✅ 欄位改名：「錄影日期」→「錄影時間」\n');
+  try {
+    await notion.patch(`/databases/${NOTION_DB_ID}`, {
+      properties: { "錄影日期": { name: "錄影時間" } },
+    });
+    console.log('✅ 欄位改名：「錄影日期」→「錄影時間」\n');
+  } catch {
+    console.log('ℹ️  欄位已是「錄影時間」，略過改名步驟\n');
+  }
 }
 
 async function fetchAllPages() {

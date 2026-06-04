@@ -27,6 +27,8 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+const FROM_MONTH = "2026-06"; // only process videos from this month onwards
+
 async function fetchAll2026Videos() {
   const videos = [];
   let page = 1;
@@ -47,11 +49,8 @@ async function fetchAll2026Videos() {
     if (data.length === 0) break;
 
     for (const v of data) {
-      if (v.created_time.startsWith("2025") || v.created_time < "2026") {
-        done = true;
-        break;
-      }
-      if (v.created_time.startsWith("2026") && v.duration >= MIN_DURATION_SEC) {
+      if (v.created_time < FROM_MONTH) { done = true; break; }
+      if (v.duration >= MIN_DURATION_SEC) {
         videos.push(v.uri.replace("/videos/", ""));
       }
     }
@@ -65,7 +64,7 @@ async function fetchAll2026Videos() {
 }
 
 async function main() {
-  console.log("📥 抓取 2026 年所有影片（>5 分鐘）...");
+  console.log(`📥 抓取 ${FROM_MONTH} 以後的影片（>5 分鐘）...`);
   const videoIds = await fetchAll2026Videos();
   console.log(`共找到 ${videoIds.length} 支符合條件的影片\n`);
 
@@ -82,13 +81,20 @@ async function main() {
       const match = findBestMatch(video, pages);
 
       if (!match) {
-        if (pages.length === 0) {
+        const THRESHOLD_MIN = 30;
+        const nearbyLinked = pages.some(
+          (p) => p.vimeoUrl && Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000) <= THRESHOLD_MIN
+        );
+        if (nearbyLinked) {
+          console.log("⏭  已涵蓋（附近頁面已有錄影連結）");
+        } else if (pages.length === 0) {
           console.log("❌ 找不到對應頁面（該日期無任何 Notion 頁面）");
+          results.noMatch++;
         } else {
           const closest = pages.map(p => Math.abs((p.createdUtc.getTime() - video.startTime.getTime()) / 60000));
           console.log(`❌ 找不到對應頁面（該日期有 ${pages.length} 頁，最近差 ${Math.round(Math.min(...closest))} min）`);
+          results.noMatch++;
         }
-        results.noMatch++;
       } else if (match.ambiguous) {
         console.log(`⚠️  配對不確定 → "${match.page.name}" (${Math.round(match.diffMin)} min diff)`);
         await updateNotionVimeoLink(match.page.id, video.link);

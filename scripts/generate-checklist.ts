@@ -13,6 +13,7 @@ const NOTION_DB_ID = process.env.NOTION_DB_ID!;
 const VIMEO_TOKEN = process.env.VIMEO_ACCESS_TOKEN!;
 const MIN_DURATION_SEC = 300;
 const DELAY_MS = 350;
+const FROM_MONTH = "2026-06"; // only check records from this month onwards
 
 const notion = axios.create({
   baseURL: "https://api.notion.com/v1",
@@ -59,7 +60,7 @@ async function fetchAll2026Videos() {
     if (data.length === 0) break;
 
     for (const v of data) {
-      if (!v.created_time.startsWith("2026")) { done = true; break; }
+      if (v.created_time < FROM_MONTH) { done = true; break; }
       if (v.duration >= MIN_DURATION_SEC) {
         const taipeiDate = new Date(new Date(v.created_time).getTime() + 8 * 3600000)
           .toISOString().slice(0, 10);
@@ -85,6 +86,7 @@ async function fetchAllNotionPages() {
 
   while (true) {
     const resp = await notion.post(`/databases/${NOTION_DB_ID}/query`, {
+      filter: { property: "錄影時間", date: { on_or_after: FROM_MONTH } },
       page_size: 100,
       ...(cursor ? { start_cursor: cursor } : {}),
     });
@@ -120,7 +122,7 @@ async function main() {
 
   // B: Notion pages with a date but no Vimeo link (only 2026 pages with a date)
   const notionNoVimeo = notionPages
-    .filter((p) => p.date.startsWith("2026") && !p.vimeoUrl)
+    .filter((p) => p.date >= FROM_MONTH && !p.vimeoUrl)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   // ── Build markdown ─────────────────────────────────────────────────────────
