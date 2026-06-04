@@ -70,6 +70,7 @@ interface NotionPage {
   meetingDate: string;   // YYYY-MM-DD from the Date property
   createdUtc: Date;      // page system created_time, used as meeting-time proxy
   vimeoUrl: string | null;
+  notionUrl: string;
 }
 
 interface NotionProperty {
@@ -113,6 +114,7 @@ export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]>
       meetingDate,
       createdUtc: meetingTime,
       vimeoUrl: props["Vimeo 錄影連結"]?.url ?? null,
+      notionUrl: p.url as string,
     };
   });
 }

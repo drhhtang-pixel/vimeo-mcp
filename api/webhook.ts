@@ -114,9 +114,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const match: MatchResult | null = findBestMatch(video, pages);
 
     if (!match) {
-      // All pages on this date already have a Vimeo link — meeting is covered, skip silently
       if (pages.length > 0 && pages.every((p) => p.vimeoUrl)) {
-        console.log(`Skip: all Notion pages on ${video.date_taipei} already have a Vimeo link`);
+        // All pages on this date already have a Vimeo link — new recording has nowhere to go
+        console.log(`All Notion pages on ${video.date_taipei} already linked — new recording unmatched`);
+        await notifySlack(
+          `⚠️ *Vimeo 錄影無法對應（當日所有 Meeting Note 已有連結）*\n` +
+          `• 影片：<${video.link}|${video.title}>\n` +
+          `• 日期：${video.date_taipei}\n` +
+          `• 長度：${Math.round(video.durationSec / 60)} 分鐘\n` +
+          `• 請確認是否需要新增 Meeting Note`
+        );
         return res.status(200).json({ matched: false, skipped: "all_already_linked", date: video.date_taipei });
       }
       // No Notion page found, or multiple pages but none within time threshold
@@ -130,34 +137,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ matched: false, date: video.date_taipei });
     }
 
-    if (match.ambiguous) {
-      console.warn(
-        `Ambiguous match: "${match.page.name}" selected (${match.diffMin.toFixed(1)} min diff) — multiple candidates within threshold on ${video.date_taipei}`
-      );
-      await notifySlack(
-        `⚠️ *Vimeo 錄影配對結果不確定，請確認*\n` +
-        `• 影片：<${video.link}|${video.title}>\n` +
-        `• 已配對到：${match.page.name}（差 ${Math.round(match.diffMin)} 分鐘）\n` +
-        `• 同一天有多個候選頁面，可能配錯`
-      );
-    } else {
-      console.log(`Match: "${match.page.name}" (${match.diffMin.toFixed(1)} min diff)`);
-    }
-
-    if (match.possibleConflict) {
-      console.warn(
-        `Possible wrong link: "${match.possibleConflict.name}" already has a link (${match.possibleConflict.currentUrl}) but is a closer match (${match.possibleConflict.diffMin.toFixed(1)} min) than "${match.page.name}" (${match.diffMin.toFixed(1)} min) — manual review needed`
-      );
-      await notifySlack(
-        `⚠️ *Vimeo 錄影可能有錯誤連結，請確認*\n` +
-        `• 影片：<${video.link}|${video.title}>\n` +
-        `• 已配對到：${match.page.name}（差 ${Math.round(match.diffMin)} 分鐘）\n` +
-        `• 但「${match.possibleConflict.name}」時間更近（差 ${Math.round(match.possibleConflict.diffMin)} 分鐘），且已有連結：${match.possibleConflict.currentUrl}`
-      );
-    }
-
     await updateNotionVimeoLink(match.page.id, video.link);
-    console.log(`Updated: "${match.page.name}" → ${video.link}`);
+    console.log(`Updated: "${match.page.name}" (${match.diffMin.toFixed(1)} min diff) → ${video.link}`);
+
+    // Build success notification
+    const warnings: string[] = [];
+    if (match.ambiguous) {
+      warnings.push(`⚠️ 同一天有多個候選頁面，可能配錯（差 ${Math.round(match.diffMin)} 分鐘）`);
+    }
+    if (match.possibleConflict) {
+      warnings.push(`⚠️ 「${match.possibleConflict.name}」時間更近（差 ${Math.round(match.possibleConflict.diffMin)} 分鐘），且已有連結`);
+    }
+
+    await notifySlack(
+      `✅ *Vimeo 錄影已自動連結*\n` +
+      `• 影片：<${video.link}|${video.title}>\n` +
+      `• 已連結到：<${match.page.notionUrl}|${match.page.name}>\n` +
+      `• 時間差：${Math.round(match.diffMin)} 分鐘` +
+      (warnings.length ? `\n` + warnings.join("\n") : "")
+    );
 
     return res.status(200).json({
       matched: true,
