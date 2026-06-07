@@ -9,9 +9,17 @@ dotenv.config({ path: join(__dirname, "../.env") });
 dotenv.config({ path: join(__dirname, "../.env.local"), override: false });
 
 const NOTION_TOKEN = process.env.NOTION_TOKEN!;
-const PARENT_PAGE_ID = process.env.NOTION_RETRY_PARENT_PAGE_ID;
+function toUuid(raw: string): string {
+  // Extract trailing 32 hex chars and format as UUID
+  const hex = raw.replace(/-/g, "").match(/[0-9a-f]{32}$/i)?.[0];
+  if (!hex) throw new Error(`Cannot extract UUID from: ${raw}`);
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
 
-if (!PARENT_PAGE_ID) {
+const rawParentId = process.env.NOTION_RETRY_PARENT_PAGE_ID;
+const PARENT_PAGE_ID = rawParentId ? toUuid(rawParentId) : undefined;
+
+if (!rawParentId) {
   console.error("❌ 請在 .env 中設定 NOTION_RETRY_PARENT_PAGE_ID（Retry Queue DB 要建在哪個 Notion 頁面下）");
   process.exit(1);
 }
