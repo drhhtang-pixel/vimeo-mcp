@@ -4,6 +4,15 @@
   "functions": {
     "api/webhook.ts": {
       "maxDuration": 30
+    },
+    "api/retry-worker.ts": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/retry-worker",
+      "schedule": "0 * * * *"
+    }
+  ]
 }

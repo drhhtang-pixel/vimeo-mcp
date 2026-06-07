@@ -12,7 +12,8 @@
     "fix-recording-date": "tsx scripts/fix-recording-date.ts",
     "generate-checklist": "tsx scripts/generate-checklist.ts",
     "date-align-sync": "tsx scripts/date-align-sync.ts",
-    "fix-recording-time": "tsx scripts/fix-recording-time.ts"
+    "fix-recording-time": "tsx scripts/fix-recording-time.ts",
+    "setup-retry-queue": "tsx scripts/setup-retry-queue.ts"
   },
   "keywords": [],
   "author": "",

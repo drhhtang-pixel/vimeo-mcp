@@ -8,6 +8,7 @@ import {
   updateNotionVimeoLink,
   type MatchResult,
 } from "../lib/matcher.js";
+import { addToRetryQueue } from "../lib/retry-queue.js";
 
 async function notifySlack(text: string): Promise<void> {
   const url = process.env.SLACK_WEBHOOK_URL;
@@ -126,15 +127,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         );
         return res.status(200).json({ matched: false, skipped: "all_already_linked", date: video.date_taipei });
       }
-      // No Notion page found, or multiple pages but none within time threshold
-      console.log(`No matching Notion page found for ${video.date_taipei}`);
-      await notifySlack(
-        `⚠️ *Vimeo 錄影找不到對應的 Notion 頁面，請手動處理*\n` +
-        `• 影片：<${video.link}|${video.title}>\n` +
-        `• 日期：${video.date_taipei}\n` +
-        `• 長度：${Math.round(video.durationSec / 60)} 分鐘`
-      );
-      return res.status(200).json({ matched: false, date: video.date_taipei });
+      // No Notion page found, or multiple pages but none within time threshold — enqueue retry
+      console.log(`No matching Notion page found for ${video.date_taipei} — adding to retry queue`);
+      if (process.env.NOTION_RETRY_DB_ID) {
+        await addToRetryQueue(video);
+        await notifySlack(
+          `⏳ *Vimeo 錄影暫時找不到對應的 Notion 頁面，將自動重試*\n` +
+          `• 影片：<${video.link}|${video.title}>\n` +
+          `• 日期：${video.date_taipei}\n` +
+          `• 長度：${Math.round(video.durationSec / 60)} 分鐘\n` +
+          `• 6 小時後自動重試（最多共 3 次）`
+        );
+      } else {
+        await notifySlack(
+          `⚠️ *Vimeo 錄影找不到對應的 Notion 頁面，請手動處理*\n` +
+          `• 影片：<${video.link}|${video.title}>\n` +
+          `• 日期：${video.date_taipei}\n` +
+          `• 長度：${Math.round(video.durationSec / 60)} 分鐘`
+        );
+      }
+      return res.status(200).json({ matched: false, queued: !!process.env.NOTION_RETRY_DB_ID, date: video.date_taipei });
     }
 
     await updateNotionVimeoLink(match.page.id, video.link);
