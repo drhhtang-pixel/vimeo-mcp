@@ -135,10 +135,13 @@ async function main() {
 
   // A: Vimeo videos with no Notion page on that date, or a page exists but is
   // already linked to a different recording (same-day multi-recording case).
+  // A video whose own link already appears on one of that day's pages is
+  // resolved, not a miss -- exclude it even if the day is otherwise "full".
   const vimeoNoNotion = vimeoVideos
     .filter((v) => {
       const pagesOnDate = notionPages.filter((p) => p.date === v.date);
-      return pagesOnDate.length === 0 || pagesOnDate.every((p) => p.vimeoUrl);
+      const alreadyLinkedToThisVideo = pagesOnDate.some((p) => p.vimeoUrl === v.link);
+      return !alreadyLinkedToThisVideo && (pagesOnDate.length === 0 || pagesOnDate.every((p) => p.vimeoUrl));
     })
     .map((v) => {
       const pagesOnDate = notionPages.filter((p) => p.date === v.date);

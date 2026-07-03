@@ -13,7 +13,8 @@
     "generate-checklist": "tsx scripts/generate-checklist.ts",
     "date-align-sync": "tsx scripts/date-align-sync.ts",
     "fix-recording-time": "tsx scripts/fix-recording-time.ts",
-    "setup-retry-queue": "tsx scripts/setup-retry-queue.ts"
+    "setup-retry-queue": "tsx scripts/setup-retry-queue.ts",
+    "list-unlinked-videos": "tsx scripts/list-unlinked-videos.ts"
   },
   "keywords": [],
   "author": "",
