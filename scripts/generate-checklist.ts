@@ -86,7 +86,17 @@ async function fetchAllNotionPages() {
 
   while (true) {
     const resp = await notion.post(`/databases/${NOTION_DB_ID}/query`, {
-      filter: { property: "錄影時間", date: { on_or_after: FROM_MONTH } },
+      filter: {
+        or: [
+          { property: "錄影時間", date: { on_or_after: FROM_MONTH } },
+          {
+            and: [
+              { property: "錄影時間", date: { is_empty: true } },
+              { timestamp: "created_time", created_time: { on_or_after: `${FROM_MONTH}-01T00:00:00+08:00` } },
+            ],
+          },
+        ],
+      },
       page_size: 100,
       ...(cursor ? { start_cursor: cursor } : {}),
     });
@@ -94,7 +104,13 @@ async function fetchAllNotionPages() {
     for (const p of resp.data.results) {
       const props = p.properties as Record<string, any>;
       const name = (props.Name?.title ?? []).map((t: any) => t.plain_text).join("").trim();
-      const date: string = props["錄影時間"]?.date?.start?.slice(0, 10) ?? "";
+      const recordingTimeRaw: string | null = props["錄影時間"]?.date?.start ?? null;
+      // Pages that never got a 錄影時間 backfilled fall back to Notion's own
+      // created_time (converted to a Taipei calendar date) so they're still
+      // visible instead of silently disappearing from the checklist.
+      const date: string = recordingTimeRaw
+        ? recordingTimeRaw.slice(0, 10)
+        : new Date(new Date(p.created_time as string).getTime() + 8 * 3600000).toISOString().slice(0, 10);
       const vimeoUrl: string | null = props["Vimeo 錄影連結"]?.url ?? null;
       pages.push({ id: p.id, name, date, vimeoUrl, notionUrl: p.url });
     }
@@ -117,8 +133,20 @@ async function main() {
 
   const notionDates = new Set(notionPages.map((p) => p.date));
 
-  // A: Vimeo videos with no Notion page on that date
-  const vimeoNoNotion = vimeoVideos.filter((v) => !notionDates.has(v.date));
+  // A: Vimeo videos with no Notion page on that date, or a page exists but is
+  // already linked to a different recording (same-day multi-recording case).
+  const vimeoNoNotion = vimeoVideos
+    .filter((v) => {
+      const pagesOnDate = notionPages.filter((p) => p.date === v.date);
+      return pagesOnDate.length === 0 || pagesOnDate.every((p) => p.vimeoUrl);
+    })
+    .map((v) => {
+      const pagesOnDate = notionPages.filter((p) => p.date === v.date);
+      const reason = pagesOnDate.length === 0
+        ? "無對應頁面"
+        : `當日頁面已有連結（同日 ${pagesOnDate.length} 筆頁面皆已連結，可能是同日多筆錄影）`;
+      return { ...v, reason };
+    });
 
   // B: Notion pages with a date but no Vimeo link (only 2026 pages with a date)
   const notionNoVimeo = notionPages
@@ -136,12 +164,12 @@ async function main() {
     ``,
     `## A｜有 Vimeo 錄影，但 Notion 無對應頁面（${vimeoNoNotion.length} 筆）`,
     ``,
-    `這些錄影在 Notion Meeting Notes 找不到對應日期的頁面，需要手動建立頁面或確認是否需要記錄。`,
+    `這些錄影在 Notion Meeting Notes 找不到對應日期的頁面，或當日頁面已被其他錄影佔用，需要手動建立頁面、補開子頁面，或確認是否需要記錄。`,
     ``,
-    `| 日期 | Vimeo 標題 | 連結 |`,
-    `|------|-----------|------|`,
+    `| 日期 | Vimeo 標題 | 連結 | 原因 |`,
+    `|------|-----------|------|------|`,
     ...vimeoNoNotion.map(
-      (v) => `| ${v.date} | ${v.title.slice(0, 50)} | [Vimeo](${v.link}) |`
+      (v) => `| ${v.date} | ${v.title.slice(0, 50)} | [Vimeo](${v.link}) | ${v.reason} |`
     ),
     ``,
     `---`,

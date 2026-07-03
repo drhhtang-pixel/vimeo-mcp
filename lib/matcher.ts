@@ -79,12 +79,30 @@ interface NotionProperty {
   date?: { start: string } | null;
 }
 
+function taipeiDayBounds(date: string): { start: string; end: string } {
+  const start = new Date(`${date}T00:00:00+08:00`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
 export async function findNotionPagesOnDate(date: string): Promise<NotionPage[]> {
-  // Filter by「錄影時間」(YYYY-MM-DD in Taipei time).
+  // Filter by「錄影時間」(YYYY-MM-DD in Taipei time). Pages whose 錄影時間 was
+  // never backfilled (empty) are also included if their Notion created_time
+  // falls on this Taipei day — the per-page mapping below already falls back
+  // to created_time as the meeting-time proxy for those.
+  const { start, end } = taipeiDayBounds(date);
   const resp = await notion.post(`/databases/${NOTION_DB_ID}/query`, {
     filter: {
-      property: "錄影時間",
-      date: { equals: date },
+      or: [
+        { property: "錄影時間", date: { equals: date } },
+        {
+          and: [
+            { property: "錄影時間", date: { is_empty: true } },
+            { timestamp: "created_time", created_time: { on_or_after: start } },
+            { timestamp: "created_time", created_time: { before: end } },
+          ],
+        },
+      ],
     },
     sorts: [{ timestamp: "created_time", direction: "ascending" }],
     page_size: 50,
